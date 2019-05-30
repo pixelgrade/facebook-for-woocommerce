@@ -356,7 +356,7 @@ class WC_Facebook_Product {
     // fb_visibility === false: set hidden on FB metadata
     // Explicitly check whether flip 'hide' before.
     return apply_filters( 'fb_for_woocommerce_product_is_hidden', ($hidden_from_catalog && $hidden_from_search) ||
-      $this->fb_visibility === false || !$this->get_fb_price(), $wpid );
+      $this->fb_visibility === false || !$this->get_fb_price(), $wpid, $this );
   }
 
   public function get_price_plus_tax($price) {
