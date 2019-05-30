@@ -109,9 +109,10 @@ class WC_Facebook_Product_Feed {
         if (get_post_type($post_id) == 'product_variation') {
           return wp_get_post_parent_id($post_id);
         }
+        return null;
     }, $post_ids);
     $all_parent_product = array_filter(array_unique($all_parent_product));
-    $product_ids = array_diff($post_ids, $all_parent_product);
+    $product_ids = apply_filters( 'fb_for_woocommerce_productfeed_post_ids', array_diff($post_ids, $all_parent_product) );
     return $this->write_product_feed_file($product_ids);
   }
 
