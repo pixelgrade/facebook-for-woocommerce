@@ -8,10 +8,10 @@
  * @package FacebookCommerce
  *
  * usage:
- * 1. set WP_DEBUG = true and WP_DEBUG_DISPLAY = false
+ * 1. set FB_WOO_DEBUG = true and FB_WOO_DEBUG_DISPLAY = false
  * 2. append "&fb_test_product_sync=true" to the url when you are on facebook-for-woocommerce setting pages
  * 3. refresh the page to launch test
- * https://codex.wordpress.org/WP_DEBUG
+ * https://codex.wordpress.org/FB_WOO_DEBUG
  */
 
 if (!defined('ABSPATH')) {

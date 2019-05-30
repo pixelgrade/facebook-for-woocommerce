@@ -328,7 +328,7 @@ if (!class_exists('WC_Facebookcommerce_Utils')) :
      * Helper log function for debugging
      */
     public static function log($message) {
-      if (WP_DEBUG === true) {
+      if (FB_WOO_DEBUG === true) {
         if (is_array($message) || is_object($message)) {
           error_log(json_encode($message));
         }

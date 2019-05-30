@@ -2098,8 +2098,8 @@ class WC_Facebookcommerce_Integration extends WC_Integration {
     }
     $currently_syncing = get_transient(self::FB_SYNC_IN_PROGRESS);
     $connected = ($page_name != '');
-    $hide_test = ($connected && $currently_syncing) || !defined('WP_DEBUG') ||
-      WP_DEBUG !== true;
+    $hide_test = ($connected && $currently_syncing) || !defined('FB_WOO_DEBUG') ||
+      FB_WOO_DEBUG !== true;
     $nux_message = $this->get_nux_message_ifexist();
     ?>
     <h2><?php _e('Facebook', $domain); ?></h2>
@@ -2305,7 +2305,7 @@ class WC_Facebookcommerce_Integration extends WC_Integration {
     <div <?php echo ($hide_test) ? ' style="display:none;" ' : ''; ?> >
       <p class="tooltip" id="test_product_sync">
       <?php
-        // WP_DEBUG mode: button to launch test
+        // FB_WOO_DEBUG mode: button to launch test
         echo sprintf(__('<a href="%s&fb_test_product_sync=true"', $domain),
           WOOCOMMERCE_FACEBOOK_PLUGIN_SETTINGS_URL);
         echo '>' . esc_html__('Launch Test', $domain);
@@ -2328,7 +2328,7 @@ class WC_Facebookcommerce_Integration extends WC_Integration {
     <?php
 
       $GLOBALS['hide_save_button'] = true;
-      if (defined('WP_DEBUG') && true === WP_DEBUG) {
+      if (defined('FB_WOO_DEBUG') && true === FB_WOO_DEBUG) {
         $GLOBALS['hide_save_button'] = false;
     ?>
       <table class="form-table">
