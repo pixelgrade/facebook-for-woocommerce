@@ -123,6 +123,9 @@ class WC_Facebook_Product_Feed {
       fwrite($feed_file, $this->get_product_feed_header_row());
 
       $product_group_attribute_variants = array();
+
+      WC_Facebookcommerce_Utils::log('Writing the following product IDs to the feed file: ' . implode( ', ', $wp_ids ) );
+
       foreach ($wp_ids as $wp_id) {
         $woo_product = new WC_Facebook_Product($wp_id);
         if ($woo_product->is_hidden()) {
@@ -291,6 +294,9 @@ class WC_Facebook_Product_Feed {
       $this->log_feed_progress(json_encode($result));
       return null;
     }
+
+    $this->log_feed_progress( 'Uploaded feed file: ' . dirname(__FILE__) . DIRECTORY_SEPARATOR . (self::FACEBOOK_CATALOG_FEED_FILENAME) );
+
     $upload_id = $result['id'];
     return $upload_id;
   }
