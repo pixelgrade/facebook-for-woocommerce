@@ -78,8 +78,8 @@ class WC_Facebook_Product_Feed {
     $this->log_feed_progress(
       'Sync all products using feed, facebook upload created');
 
-    unlink(dirname(__FILE__) .
-      DIRECTORY_SEPARATOR . (self::FACEBOOK_CATALOG_FEED_FILENAME));
+//    unlink(dirname(__FILE__) .
+//      DIRECTORY_SEPARATOR . (self::FACEBOOK_CATALOG_FEED_FILENAME));
 
     $total_product_count =
       $this->has_default_product_count + $this->no_default_product_count;
@@ -124,7 +124,7 @@ class WC_Facebook_Product_Feed {
 
       $product_group_attribute_variants = array();
 
-      WC_Facebookcommerce_Utils::log('Writing the following product IDs to the feed file: ' . implode( ', ', $wp_ids ) );
+      $this->log_feed_progress('Writing the following product IDs (' . count( $wp_ids ) . ' products) to the feed file: ' . implode( ', ', $wp_ids ) );
 
       foreach ($wp_ids as $wp_id) {
         $woo_product = new WC_Facebook_Product($wp_id);
