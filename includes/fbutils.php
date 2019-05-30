@@ -321,7 +321,7 @@ if (!class_exists('WC_Facebookcommerce_Utils')) :
         'post_type'  => $post_type,
         'posts_per_page' => -1,
       );
-      return get_posts($args);
+      return apply_filters( 'fb_for_woocommerce_get_wp_posts_ids', get_posts( $args ), $args );
     }
 
     /**

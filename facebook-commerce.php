@@ -1709,7 +1709,7 @@ class WC_Facebookcommerce_Integration extends WC_Integration {
 
     $total_new = count($post_ids_new);
     $total_old = count($post_ids_old);
-    $post_ids = array_merge($post_ids_new, $post_ids_old);
+    $post_ids = apply_filters( 'fb_for_woocommerce_sync_all_products_post_ids', array_merge($post_ids_new, $post_ids_old) );
     $total = count($post_ids);
 
     WC_Facebookcommerce_Utils::fblog(
