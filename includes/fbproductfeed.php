@@ -78,8 +78,11 @@ class WC_Facebook_Product_Feed {
     $this->log_feed_progress(
       'Sync all products using feed, facebook upload created');
 
-//    unlink(dirname(__FILE__) .
-//      DIRECTORY_SEPARATOR . (self::FACEBOOK_CATALOG_FEED_FILENAME));
+    // Do not delete the generated feed file if debug is activated.
+    if ( !defined('FB_WOO_DEBUG') || true !== FB_WOO_DEBUG ) {
+	    unlink( dirname( __FILE__ ) .
+	            DIRECTORY_SEPARATOR . ( self::FACEBOOK_CATALOG_FEED_FILENAME ) );
+    }
 
     $total_product_count =
       $this->has_default_product_count + $this->no_default_product_count;
