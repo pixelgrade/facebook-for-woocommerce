@@ -178,9 +178,12 @@ class WC_Facebook_Product_Feed {
         $parent_attribute_values['default_variant_id'] = $variation_id;
         $parent_attribute_values['item_group_id'] =
           WC_Facebookcommerce_Utils::get_fb_retailer_id($parent_product);
-        foreach ($variants_for_group as $variant) {
-          $parent_attribute_values[$variant['product_field']] =
-            $variant['options'];
+
+        if ( ! empty( $variants_for_group ) ) {
+	        foreach ( $variants_for_group as $variant ) {
+		        $parent_attribute_values[ $variant['product_field'] ] =
+			        $variant['options'];
+	        }
         }
         // cache product group variants
         $attribute_variants[$parent_id] = $parent_attribute_values;
