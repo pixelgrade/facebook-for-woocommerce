@@ -36,9 +36,12 @@ class WC_Facebookcommerce_Background_Process extends WP_Background_Process {
 
     if (is_wp_error($dispatched)) {
       WC_Facebookcommerce_Utils::log(
-        sprintf('Unable to dispatch FB Background processor: %s',
-          $dispatched->get_error_message()),
-        array( 'source' => 'wc_facebook_background_process' ));
+					sprintf(
+						'Unable to dispatch FB Background processor: %s',
+						$dispatched->get_error_message()
+					),
+					array( 'source' => 'wc_facebook_background_process' )
+				);
     }
   }
 
@@ -77,13 +80,17 @@ class WC_Facebookcommerce_Background_Process extends WP_Background_Process {
    */
   protected function schedule_event() {
     if (!wp_next_scheduled($this->cron_hook_identifier)) {
-      wp_schedule_event(time() + 10, $this->cron_interval_identifier,
-        $this->cron_hook_identifier);
+				wp_schedule_event(
+					time() + 10,
+					$this->cron_interval_identifier,
+					$this->cron_hook_identifier
+				);
     }
   }
 
   /**
    * Is the processor updating?
+		 *
    * @return boolean
    */
   public function is_updating() {
@@ -92,6 +99,7 @@ class WC_Facebookcommerce_Background_Process extends WP_Background_Process {
 
   /**
    * Is the processor running?
+		 *
    * @return boolean
    */
   public function is_running() {
@@ -113,7 +121,8 @@ class WC_Facebookcommerce_Background_Process extends WP_Background_Process {
     $remaining = $this->get_item_count();
     $count_message = sprintf(
       'Background syncing products to Facebook. Products remaining: %1$d',
-      $remaining);
+				$remaining
+			);
 
     $this->commerce->display_sticky_message($count_message, true);
 
@@ -122,10 +131,12 @@ class WC_Facebookcommerce_Background_Process extends WP_Background_Process {
     set_transient(
       $commerce::FB_SYNC_IN_PROGRESS,
       true,
-      $commerce::FB_SYNC_TIMEOUT);
+				$commerce::FB_SYNC_TIMEOUT
+			);
     set_transient(
       $commerce::FB_SYNC_REMAINING,
-      $remaining);
+				$remaining
+			);
 
     return false;
   }
@@ -140,8 +151,8 @@ class WC_Facebookcommerce_Background_Process extends WP_Background_Process {
     $commerce = $this->commerce;  // PHP5 compatibility for static access
     delete_transient($commerce::FB_SYNC_IN_PROGRESS);
     delete_transient($commerce::FB_SYNC_REMAINING);
-    WC_Facebookcommerce_Utils::log("Background sync complete!");
-    WC_Facebookcommerce_Utils::fblog("Background sync complete!");
+			WC_Facebookcommerce_Utils::log( 'Background sync complete!' );
+			WC_Facebookcommerce_Utils::fblog( 'Background sync complete!' );
     $this->commerce->remove_sticky_message();
     $this->commerce->display_info_message('Facebook product sync complete!');
     parent::complete();

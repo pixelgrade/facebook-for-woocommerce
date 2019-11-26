@@ -21,7 +21,6 @@ if (!class_exists('WC_Facebookcommerce_Async_Request')) :
 
 /**
  * FB Graph API async request
- *
  */
 class WC_Facebookcommerce_Async_Request extends WP_Async_Request {
 

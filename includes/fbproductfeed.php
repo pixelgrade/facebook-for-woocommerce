@@ -43,13 +43,15 @@ class WC_Facebook_Product_Feed {
 
     if (!is_writable(dirname(__FILE__))) {
       $this->log_feed_progress(
-        'Failure - Sync all products using feed, folder is not writable');
+					'Failure - Sync all products using feed, folder is not writable'
+				);
       return false;
     }
 
     if (!$this->generate_productfeed_file()) {
       $this->log_feed_progress(
-        'Failure - Sync all products using feed, feed file not generated');
+					'Failure - Sync all products using feed, feed file not generated'
+				);
       return false;
     }
     $this->log_feed_progress('Sync all products using feed, feed file generated');
@@ -58,31 +60,34 @@ class WC_Facebook_Product_Feed {
       $this->feed_id = $this->create_feed();
       if (!$this->feed_id) {
         $this->log_feed_progress(
-          'Failure - Sync all products using feed, facebook feed not created');
+						'Failure - Sync all products using feed, facebook feed not created'
+					);
         return false;
       }
       $this->log_feed_progress(
-        'Sync all products using feed, facebook feed created');
+					'Sync all products using feed, facebook feed created'
+				);
     } else {
       $this->log_feed_progress(
-        'Sync all products using feed, facebook feed already exists.');
+					'Sync all products using feed, facebook feed already exists.'
+				);
     }
-
 
     $this->upload_id = $this->create_upload($this->feed_id);
     if (!$this->upload_id) {
       $this->log_feed_progress(
-        'Failure - Sync all products using feed, facebook upload not created');
+					'Failure - Sync all products using feed, facebook upload not created'
+				);
       return false;
     }
     $this->log_feed_progress(
-      'Sync all products using feed, facebook upload created');
+				'Sync all products using feed, facebook upload created'
+			);
 
-    // Do not delete the generated feed file if debug is activated.
-    if ( !defined('FB_WOO_DEBUG') || true !== FB_WOO_DEBUG ) {
-	    unlink( dirname( __FILE__ ) .
-	            DIRECTORY_SEPARATOR . ( self::FACEBOOK_CATALOG_FEED_FILENAME ) );
-    }
+			unlink(
+				dirname( __FILE__ ) .
+				DIRECTORY_SEPARATOR . ( self::FACEBOOK_CATALOG_FEED_FILENAME )
+			);
 
     $total_product_count =
       $this->has_default_product_count + $this->no_default_product_count;
@@ -108,27 +113,30 @@ class WC_Facebook_Product_Feed {
   public function generate_productfeed_file() {
     $this->log_feed_progress('Generating product feed file');
     $post_ids = $this->get_product_wpid();
-    $all_parent_product = array_map(function($post_id) {
+			$all_parent_product = array_map(
+				function( $post_id ) {
         if (get_post_type($post_id) == 'product_variation') {
           return wp_get_post_parent_id($post_id);
         }
-    }, $post_ids);
+				},
+				$post_ids
+			);
     $all_parent_product = array_filter(array_unique($all_parent_product));
-    $product_ids = apply_filters( 'fb_for_woocommerce_productfeed_post_ids', array_diff($post_ids, $all_parent_product) );
+			$product_ids        = array_diff( $post_ids, $all_parent_product );
     return $this->write_product_feed_file($product_ids);
   }
 
   public function write_product_feed_file($wp_ids) {
     try {
       $feed_file =
-        fopen(dirname(__FILE__) . DIRECTORY_SEPARATOR .
-        (self::FACEBOOK_CATALOG_FEED_FILENAME), "w");
+				fopen(
+					dirname( __FILE__ ) . DIRECTORY_SEPARATOR .
+					( self::FACEBOOK_CATALOG_FEED_FILENAME ),
+					'w'
+				);
       fwrite($feed_file, $this->get_product_feed_header_row());
 
       $product_group_attribute_variants = array();
-
-      $this->log_feed_progress('Writing the following product IDs (' . count( $wp_ids ) . ' products) to the feed file: ' . implode( ', ', $wp_ids ) );
-
       foreach ($wp_ids as $wp_id) {
         $woo_product = new WC_Facebook_Product($wp_id);
         if ($woo_product->is_hidden()) {
@@ -139,7 +147,9 @@ class WC_Facebook_Product_Feed {
           continue;
         }
         $product_data_as_feed_row = $this->prepare_product_for_feed(
-          $woo_product, $product_group_attribute_variants);
+						$woo_product,
+						$product_group_attribute_variants
+					);
         fwrite($feed_file, $product_data_as_feed_row);
       }
       fclose($feed_file);
@@ -184,13 +194,10 @@ class WC_Facebook_Product_Feed {
         $parent_attribute_values['default_variant_id'] = $variation_id;
         $parent_attribute_values['item_group_id'] =
           WC_Facebookcommerce_Utils::get_fb_retailer_id($parent_product);
-
-        if ( ! empty( $variants_for_group ) ) {
 	        foreach ( $variants_for_group as $variant ) {
 		        $parent_attribute_values[ $variant['product_field'] ] =
 			        $variant['options'];
 	        }
-        }
         // cache product group variants
         $attribute_variants[$parent_id] = $parent_attribute_values;
       }
@@ -203,7 +210,8 @@ class WC_Facebook_Product_Feed {
           $variant_array['product_field'],
           $variant_array['options'][0],
           $parent_attribute_values,
-          $variant_feed_column);
+						$variant_feed_column
+					);
       }
       if (isset($product_data['custom_data'])) {
         foreach ($product_data['custom_data'] as $product_field => $value) {
@@ -211,17 +219,20 @@ class WC_Facebook_Product_Feed {
             $product_field,
             $value,
             $parent_attribute_values,
-            $variant_feed_column);
+							$variant_feed_column
+						);
         }
       }
       if (!empty($variant_feed_column)) {
         $product_data['variant'] =
-          "\"" . implode(',', $variant_feed_column) . "\"";
+					'"' . implode( ',', $variant_feed_column ) . '"';
       }
       if (isset($parent_attribute_values['gallery_urls'])) {
         $product_data['additional_image_urls'] =
-          array_merge($product_data['additional_image_urls'],
-            $parent_attribute_values['gallery_urls']);
+					array_merge(
+						$product_data['additional_image_urls'],
+						$parent_attribute_values['gallery_urls']
+					);
       }
       if (isset($parent_attribute_values['item_group_id'])) {
         $item_group_id = $parent_attribute_values['item_group_id'];
@@ -244,11 +255,10 @@ class WC_Facebook_Product_Feed {
     // log simple product
     if (!isset($product_data['default_product'])) {
       $this->no_default_product_count++;
-      $product_data['default_product'] = '';
+				$product_data['default_product'];
     }
 
-    return
-      $product_data['retailer_id'] . ',' .
+			return $product_data['retailer_id'] . ',' .
       static::format_string_for_feed($product_data['name']) . ',' .
       static::format_string_for_feed($product_data['description']) . ',' .
       $product_data['image_url'] . ',' .
@@ -256,16 +266,21 @@ class WC_Facebook_Product_Feed {
       static::format_string_for_feed($product_data['category']) . ',' .
       static::format_string_for_feed($product_data['brand']) . ',' .
       static::format_price_for_feed(
-        $product_data['price'], $product_data['currency']) . ',' .
+				$product_data['price'],
+				$product_data['currency']
+			) . ',' .
       $product_data['availability'] . ',' .
       $item_group_id . ',' .
       $product_data['checkout_url'] . ',' .
       static::format_additional_image_url(
-        $product_data['additional_image_urls']) . ',' .
+				$product_data['additional_image_urls']
+			) . ',' .
       $product_data['sale_price_start_date'] . '/' .
       $product_data['sale_price_end_date']. ',' .
       static::format_price_for_feed(
-        $product_data['sale_price'], $product_data['currency']) . ',' .
+				$product_data['sale_price'],
+				$product_data['currency']
+			) . ',' .
       'new' . ',' .
       $product_data['visibility'] . ',' .
       $product_data['default_product'] . ',' .
@@ -274,7 +289,9 @@ class WC_Facebook_Product_Feed {
 
   private function create_feed() {
     $result = $this->fbgraph->create_feed(
-      $this->facebook_catalog_id, array('name' => self::FEED_NAME));
+				$this->facebook_catalog_id,
+				array( 'name' => self::FEED_NAME )
+			);
     if (is_wp_error($result) || !isset($result['body'])) {
       $this->log_feed_progress(json_encode($result));
       return null;
@@ -283,7 +300,8 @@ class WC_Facebook_Product_Feed {
     $feed_id = $decode_result->id;
     if (!$feed_id) {
       $this->log_feed_progress(
-        'Response from creating feed not return feed id!');
+					'Response from creating feed not return feed id!'
+				);
       return null;
     }
     return $feed_id;
@@ -291,15 +309,14 @@ class WC_Facebook_Product_Feed {
 
   private function create_upload($facebook_feed_id) {
     $result = $this->fbgraph->create_upload(
-      $facebook_feed_id, dirname(__FILE__) . DIRECTORY_SEPARATOR .
-      (self::FACEBOOK_CATALOG_FEED_FILENAME));
+				$facebook_feed_id,
+				dirname( __FILE__ ) . DIRECTORY_SEPARATOR .
+				( self::FACEBOOK_CATALOG_FEED_FILENAME )
+			);
     if (is_null($result) || !isset($result['id']) || !$result['id']) {
       $this->log_feed_progress(json_encode($result));
       return null;
     }
-
-    $this->log_feed_progress( 'Uploaded feed file: ' . dirname(__FILE__) . DIRECTORY_SEPARATOR . (self::FACEBOOK_CATALOG_FEED_FILENAME) );
-
     $upload_id = $result['id'];
     return $upload_id;
   }
@@ -310,9 +327,10 @@ class WC_Facebook_Product_Feed {
     $product_image_urls = array_slice(
       $product_image_urls,
       0,
-      self::FB_ADDITIONAL_IMAGES_FOR_FEED);
+				self::FB_ADDITIONAL_IMAGES_FOR_FEED
+			);
     if ($product_image_urls) {
-      return "\"" . implode(',', $product_image_urls) . "\"";
+				return '"' . implode( ',', $product_image_urls ) . '"';
     } else {
       return '';
     }
@@ -320,7 +338,7 @@ class WC_Facebook_Product_Feed {
 
   private static function format_string_for_feed($text) {
     if ((bool)$text) {
-      return "\"" . str_replace('"', "'", $text) . "\"";
+				return '"' . str_replace( '"', "'", $text ) . '"';
     } else {
       return '';
     }
@@ -338,10 +356,12 @@ class WC_Facebook_Product_Feed {
     if (!array_key_exists($product_field, $parent_attribute_values)) {
       return;
     }
-    array_push($variant_feed_column,
+			array_push(
+				$variant_feed_column,
       $product_field . ':' .
       implode('/', $parent_attribute_values[$product_field]) . ':' .
-      $value);
+				$value
+			);
   }
 
    public function is_upload_complete(&$settings) {
@@ -371,7 +391,8 @@ class WC_Facebook_Product_Feed {
      $post_ids = WC_Facebookcommerce_Utils::get_wp_posts(
        null,
        null,
-       array('product', 'product_variation'));
+				array( 'product', 'product_variation' )
+			);
      return $post_ids;
    }
 }

@@ -16,12 +16,11 @@ if (!class_exists('WC_Facebookcommerce_Utils')) :
 
   /**
    * FB Graph API helper functions
-   *
    */
   class WC_Facebookcommerce_Utils {
 
     const FB_RETAILER_ID_PREFIX = 'wc_post_id_';
-    const PLUGIN_VERSION = '1.9.12';  // Change it in `facebook-for-*.php` also
+		const PLUGIN_VERSION        = '1.9.15';  // Change it in `facebook-for-*.php` also
 
     const FB_VARIANT_IMAGE = 'fb_image';
     const FB_VARIANT_SIZE = 'size';
@@ -35,7 +34,11 @@ if (!class_exists('WC_Facebookcommerce_Utils')) :
     public static $store_name = null;
 
     public static $validGenderArray =
-      array("male" => 1, "female" => 1, "unisex" => 1);
+		array(
+			'male'   => 1,
+			'female' => 1,
+			'unisex' => 1,
+		);
     /**
      * WooCommerce 2.1 support for wc_enqueue_js
      *
@@ -103,19 +106,22 @@ if (!class_exists('WC_Facebookcommerce_Utils')) :
       $category_path = wp_get_post_terms(
         $wpid,
         'product_cat',
-        array('fields' => 'all'));
+				array( 'fields' => 'all' )
+			);
       $content_category = array_values(
         array_map(
           function($item) {
             return $item->name;
           },
-          $category_path));
+					$category_path
+				)
+			);
       $content_category_slice = array_slice($content_category, -1);
       $categories =
         empty($content_category) ? '""' : implode(', ', $content_category);
       return array(
         'name' => array_pop($content_category_slice),
-        'categories' => $categories
+				'categories' => $categories,
       );
     }
 
@@ -144,7 +150,7 @@ if (!class_exists('WC_Facebookcommerce_Utils')) :
     public static function clean_string($string) {
       $string = do_shortcode($string);
       $string = str_replace(array('&amp%3B', '&amp;'), '&', $string);
-      $string = str_replace(array("\r", "&nbsp;", "\t"), ' ', $string);
+			$string = str_replace( array( "\r", '&nbsp;', "\t" ), ' ', $string );
       $string = wp_strip_all_tags($string, false); // true == remove line breaks
       return $string;
     }
@@ -159,7 +165,7 @@ if (!class_exists('WC_Facebookcommerce_Utils')) :
      */
     public static function get_product_array($woo_product) {
       $result = array();
-      if (WC_Facebookcommerce_Utils::is_variable_type($woo_product->get_type())) {
+			if ( self::is_variable_type( $woo_product->get_type() ) ) {
         foreach ($woo_product->get_children() as $item_id) {
           array_push($result, $item_id);
         }
@@ -186,7 +192,7 @@ if (!class_exists('WC_Facebookcommerce_Utils')) :
      * @return string
      */
     public static function getIntegrationName() {
-      if (WC_Facebookcommerce_Utils::isWoocommerceIntegration()) {
+			if ( self::isWoocommerceIntegration() ) {
         return 'WooCommerce';
       } else {
         return 'WordPress';
@@ -213,9 +219,12 @@ if (!class_exists('WC_Facebookcommerce_Utils')) :
             // /conversion-tracking#advanced_match
             'em' => $current_user->user_email,
             'fn' => $current_user->user_firstname,
-            'ln' => $current_user->user_lastname
+						'ln' => $current_user->user_lastname,
           ),
-          function ($value) { return $value !== null && $value !== ''; });
+					function ( $value ) {
+						return $value !== null && $value !== '';
+					}
+				);
       }
     }
 
@@ -231,19 +240,24 @@ if (!class_exists('WC_Facebookcommerce_Utils')) :
         $object['plugin_version'] = self::PLUGIN_VERSION;
         $object['php_version'] = phpversion();
       }
-      $message = json_encode(array(
+			$message = json_encode(
+				array(
         'message' => $message,
-        'object' => $object
-      ));
+					'object'  => $object,
+				)
+			);
       $ems = $ems ?: self::$ems;
       if ($ems) {
         self::$fbgraph->log(
           $ems,
           $message,
-          $error);
+					$error
+				);
       } else {
-        error_log('external merchant setting is null, something wrong here: ' .
-          $message);
+				error_log(
+					'external merchant setting is null, something wrong here: ' .
+					$message
+				);
       }
     }
 
@@ -261,7 +275,8 @@ if (!class_exists('WC_Facebookcommerce_Utils')) :
          self::$fbgraph->log_tip_event(
            $tip_id,
            $channel_id,
-           $event);
+					$event
+				);
        } else {
          error_log('external merchant setting is null');
        }
@@ -280,7 +295,8 @@ if (!class_exists('WC_Facebookcommerce_Utils')) :
         self::log(
           'Non manage_woocommerce user attempting to'.$action_text.'!',
           array(),
-          true);
+					true
+				);
         if ($die) {
           wp_die();
         }
@@ -321,18 +337,17 @@ if (!class_exists('WC_Facebookcommerce_Utils')) :
         'post_type'  => $post_type,
         'posts_per_page' => -1,
       );
-      return apply_filters( 'fb_for_woocommerce_get_wp_posts_ids', get_posts( $args ), $args );
+			return get_posts( $args );
     }
 
     /**
      * Helper log function for debugging
      */
     public static function log($message) {
-      if (FB_WOO_DEBUG === true) {
+			if ( WP_DEBUG === true ) {
         if (is_array($message) || is_object($message)) {
           error_log(json_encode($message));
-        }
-        else {
+				} else {
           error_log(sanitize_textarea_field($message));
         }
       }
@@ -343,13 +358,17 @@ if (!class_exists('WC_Facebookcommerce_Utils')) :
       if (self::$store_name) {
         return self::$store_name;
       }
-      $name = trim(str_replace(
+			$name = trim(
+				str_replace(
         "'",
         "\u{2019}",
         html_entity_decode(
           get_bloginfo('name'),
           ENT_QUOTES,
-          'UTF-8')));
+						'UTF-8'
+					)
+				)
+			);
       if ($name) {
         self::$store_name = $name;
         return $name;
@@ -402,22 +421,22 @@ if (!class_exists('WC_Facebookcommerce_Utils')) :
         $first_char = strtolower(substr($gender, 0, 1));
         // Men, Man, Boys
         if ($first_char === 'm' || $first_char === 'b') {
-          return "male";
+					return 'male';
         }
         // Women, Woman, Female, Ladies
         if ($first_char === 'w' || $first_char === 'f' || $first_char === 'l') {
-          return "female";
+					return 'female';
         }
         if ($first_char === 'u') {
-          return "unisex";
+					return 'unisex';
         }
         if (strlen($gender) >= 3) {
           $gender = strtolower(substr($gender, 0, 3));
           if ($gender === 'gir' || $gender === 'her') {
-            return "female";
+						return 'female';
           }
           if ($gender === 'him' || $gender === 'his' || $gender == 'guy') {
-            return "male";
+						return 'male';
           }
         }
         return null;
@@ -476,8 +495,9 @@ if (!class_exists('WC_Facebookcommerce_Utils')) :
     }
 
     public static function get_cached_best_tip() {
-      $cached_best_tip = WC_Facebookcommerce_Utils::decode_json(
-        get_option('fb_info_banner_last_best_tip', ''));
+			$cached_best_tip = self::decode_json(
+				get_option( 'fb_info_banner_last_best_tip', '' )
+			);
       return $cached_best_tip;
     }
   }

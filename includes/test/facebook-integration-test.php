@@ -8,18 +8,18 @@
  * @package FacebookCommerce
  *
  * usage:
- * 1. set FB_WOO_DEBUG = true and FB_WOO_DEBUG_DISPLAY = false
+ * 1. set WP_DEBUG = true and WP_DEBUG_DISPLAY = false
  * 2. append "&fb_test_product_sync=true" to the url when you are on facebook-for-woocommerce setting pages
  * 3. refresh the page to launch test
- * https://codex.wordpress.org/FB_WOO_DEBUG
+ * https://codex.wordpress.org/WP_DEBUG
  */
 
 if (!defined('ABSPATH')) {
   exit;
 }
 
-include_once(dirname(__DIR__) . '/fbutils.php');
-include_once('fbproductfeed-test.php');
+require_once dirname( __DIR__ ) . '/fbutils.php';
+require_once 'fbproductfeed-test.php';
 
 if (!class_exists('WC_Facebook_Integration_Test')) :
 
@@ -66,8 +66,10 @@ class WC_Facebook_Integration_Test {
 
     self::$commerce = $commerce;
 
-    add_action('wp_ajax_ajax_test_sync_products_using_feed',
-      array($this, 'ajax_test_sync_products_using_feed'));
+			add_action(
+				'wp_ajax_ajax_test_sync_products_using_feed',
+				array( $this, 'ajax_test_sync_products_using_feed' )
+			);
   }
 
   /**
@@ -83,10 +85,12 @@ class WC_Facebook_Integration_Test {
       if (empty($this->product_post_wpid)) {
         self::$test_pass = 0;
         WC_Facebookcommerce_Utils::log(
-          'Test - Fail to create test product by inserting posts.');
+						'Test - Fail to create test product by inserting posts.'
+					);
         WC_Facebookcommerce_Utils::set_test_fail_reason(
           'Fail to create test products by inserting posts.',
-          (new Exception)->getTraceAsString());
+						( new Exception() )->getTraceAsString()
+					);
         update_option('fb_test_pass', false);
         wp_die();
         return;
@@ -100,7 +104,8 @@ class WC_Facebook_Integration_Test {
         $time_start = microtime(true);
         while ((microtime(true) - $time_start) < self::MAX_SLEEP_IN_SEC) {
           $complete = self::$commerce->fbproductfeed->is_upload_complete(
-            self::$commerce->settings);
+							self::$commerce->settings
+						);
           if ($complete) {
             break;
           } else {
@@ -113,7 +118,8 @@ class WC_Facebook_Integration_Test {
           self::$test_pass = 0;
         } else {
           WC_Facebookcommerce_Utils::log(
-            'Test - Products create successfully.');
+							'Test - Products create successfully.'
+						);
         }
         // Clean up whatever has been created.
         // Test on_product_delete API hook.
@@ -121,30 +127,36 @@ class WC_Facebook_Integration_Test {
         if (!$clean_up) {
           self::$test_pass = 0;
           WC_Facebookcommerce_Utils::log(
-            'Test - Fail to delete product from FB');
+							'Test - Fail to delete product from FB'
+						);
           WC_Facebookcommerce_Utils::set_test_fail_reason(
             'Fail to delete product from FB',
-            (new Exception)->getTraceAsString());
+							( new Exception() )->getTraceAsString()
+						);
         } else {
           WC_Facebookcommerce_Utils::log(
-            'Test - Delete product from FB successfully');
+							'Test - Delete product from FB successfully'
+						);
         }
       } else {
         self::$test_pass = 0;
         WC_Facebookcommerce_Utils::log(
-          'Test - Sync all products using feed, curl failed.');
+						'Test - Sync all products using feed, curl failed.'
+					);
         WC_Facebookcommerce_Utils::set_test_fail_reason(
           'Sync all products using feed, curl failed',
-          (new Exception)->getTraceAsString());
+						( new Exception() )->getTraceAsString()
+					);
       }
-
     } else {
       self::$test_pass = 0;
       WC_Facebookcommerce_Utils::log(
-        'Test - Fail to remove FBIDs from local DB');
+					'Test - Fail to remove FBIDs from local DB'
+				);
       WC_Facebookcommerce_Utils::set_test_fail_reason(
         'Fail to remove FBIDs from local DB',
-        (new Exception)->getTraceAsString());
+					( new Exception() )->getTraceAsString()
+				);
     }
     update_option('fb_test_pass', self::$test_pass);
     wp_die();
@@ -156,16 +168,19 @@ class WC_Facebook_Integration_Test {
       WC_Facebookcommerce_Utils::log('Test - Failed to create 3 product items.');
       WC_Facebookcommerce_Utils::set_test_fail_reason(
         'Failed to create 3 product items.',
-        (new Exception)->getTraceAsString());
+					( new Exception() )->getTraceAsString()
+				);
       return false;
     }
 
     if (count(self::$retailer_ids) > 3) {
       WC_Facebookcommerce_Utils::log(
-        'Test - Failed to skip invisible products.');
+					'Test - Failed to skip invisible products.'
+				);
       WC_Facebookcommerce_Utils::set_test_fail_reason(
         'Failed to skip invisible products.',
-        (new Exception)->getTraceAsString());
+					( new Exception() )->getTraceAsString()
+				);
       return false;
     }
 
@@ -178,10 +193,15 @@ class WC_Facebook_Integration_Test {
       $group_fbid =
         $this->check_fbid_api(self::FB_PRODUCT_GROUP_ID, $retailer_id);
       if (!$item_fbid || !$group_fbid) {
-        WC_Facebookcommerce_Utils::log('Test - ' . $product_type .
-        ' product failed to create.');
-        WC_Facebookcommerce_Utils::set_test_fail_reason($product_type .
-          ' product failed to create.', (new Exception)->getTraceAsString());
+					WC_Facebookcommerce_Utils::log(
+						'Test - ' . $product_type .
+						' product failed to create.'
+					);
+					WC_Facebookcommerce_Utils::set_test_fail_reason(
+						$product_type .
+						' product failed to create.',
+						( new Exception() )->getTraceAsString()
+					);
         return false;
       }
     }
@@ -201,10 +221,15 @@ class WC_Facebook_Integration_Test {
     $simple_product_result =
       $this->check_product_info(self::$retailer_ids[0], false, $data);
     if (!$simple_product_result) {
-      WC_Facebookcommerce_Utils::log('Test - Simple product failed to match ' .
-      'product details.');
-      WC_Facebookcommerce_Utils::set_test_fail_reason('Simple product failed to'
-      . ' match product details.', (new Exception)->getTraceAsString());
+				WC_Facebookcommerce_Utils::log(
+					'Test - Simple product failed to match ' .
+					'product details.'
+				);
+				WC_Facebookcommerce_Utils::set_test_fail_reason(
+					'Simple product failed to'
+					. ' match product details.',
+					( new Exception() )->getTraceAsString()
+				);
       return false;
     }
 
@@ -219,10 +244,12 @@ class WC_Facebook_Integration_Test {
       $this->check_product_info(self::$retailer_ids[1], true, $data);
     if (!$variable_product_result) {
       WC_Facebookcommerce_Utils::log(
-        'Test - Variable product failed to match product details.');
+					'Test - Variable product failed to match product details.'
+				);
       WC_Facebookcommerce_Utils::set_test_fail_reason(
         'Variable product failed to match product details.',
-        (new Exception)->getTraceAsString());
+					( new Exception() )->getTraceAsString()
+				);
       return false;
     }
     return true;
@@ -232,21 +259,26 @@ class WC_Facebook_Integration_Test {
     $product_fbid_result = self::$fbgraph->get_facebook_id(
       self::$commerce->product_catalog_id,
       $fb_retailer_id,
-      true);
+				true
+			);
 
     if (is_wp_error($product_fbid_result)) {
       WC_Facebookcommerce_Utils::log(
-        'Test - ' . $product_fbid_result->get_error_message());
+					'Test - ' . $product_fbid_result->get_error_message()
+				);
       WC_Facebookcommerce_Utils::set_test_fail_reason(
         'There was an issue connecting to the Facebook API: '.
         $product_fbid_result->get_error_message(),
-        (new Exception)->getTraceAsString());
+						( new Exception() )->getTraceAsString()
+					);
       return false;
     }
 
     if ($product_fbid_result && isset($product_fbid_result['body'])) {
       $body = WC_Facebookcommerce_Utils::decode_json(
-        $product_fbid_result['body'], true);
+					$product_fbid_result['body'],
+					true
+				);
       if ($body && isset($body['id'])) {
         if ($fbid_type == self::FB_PRODUCT_GROUP_ID) {
            $fb_id =
@@ -267,33 +299,40 @@ class WC_Facebook_Integration_Test {
     $prod_info_result = self::$fbgraph->check_product_info(
       self::$commerce->product_catalog_id,
       $retailer_id,
-      $has_variant);
+				$has_variant
+			);
     if (is_wp_error($prod_info_result)) {
       WC_Facebookcommerce_Utils::log(
-        'Test - ' . $prod_info_result->get_error_message());
+					'Test - ' . $prod_info_result->get_error_message()
+				);
       WC_Facebookcommerce_Utils::set_test_fail_reason(
         'There was an issue connecting to the Facebook API: '.
         $prod_info_result->get_error_message(),
-        (new Exception)->getTraceAsString());
+						( new Exception() )->getTraceAsString()
+					);
       return false;
     }
 
     $match = true;
     if ($prod_info_result && isset($prod_info_result['body'])) {
       $body = WC_Facebookcommerce_Utils::decode_json(
-        $prod_info_result['body'], true);
+					$prod_info_result['body'],
+					true
+				);
       if (!$body) {
         return false;
       }
       if ($body['name'] != $data['name']) {
         WC_Facebookcommerce_Utils::log(
-          'Test - ' . $retailer_id . " doesn\'t match name.");
+						'Test - ' . $retailer_id . " doesn\'t match name."
+					);
         $match = false;
       }
 
       if ($body['description'] != $data['description']) {
         WC_Facebookcommerce_Utils::log(
-          'Test - ' . $retailer_id . " doesn\'t match description.");
+						'Test - ' . $retailer_id . " doesn\'t match description."
+					);
         $match = false;
       }
       // Woo doesn't have API to return currency symbol.
@@ -303,33 +342,39 @@ class WC_Facebook_Integration_Test {
       $price = floatval(preg_replace('/[^\d\.]+/', '', $body['price']));
       if ($price != $data['price']) {
         WC_Facebookcommerce_Utils::log(
-          'Test - ' . $retailer_id . " doesn\'t match price.");
+						'Test - ' . $retailer_id . " doesn\'t match price."
+					);
         $match = false;
       }
       // Check sale price and dates.
       if (isset($data['sale_price'])) {
           $sale_price = floatval(
-            preg_replace('/[^\d\.]+/', '', $body['sale_price']));
+						preg_replace( '/[^\d\.]+/', '', $body['sale_price'] )
+					);
         if ($sale_price != $data['sale_price']) {
           WC_Facebookcommerce_Utils::log(
-            'Test - ' . $retailer_id . " doesn\'t match sale price.");
+								'Test - ' . $retailer_id . " doesn\'t match sale price."
+							);
           $match = false;
         }
         if ($body['sale_price_start_date'] != $data['sale_price_dates_from']) {
           WC_Facebookcommerce_Utils::log(
-            'Test - ' . $retailer_id . " doesn\'t match sale price start date");
+							'Test - ' . $retailer_id . " doesn\'t match sale price start date"
+						);
           $match = false;
         }
         if ($body['sale_price_end_date'] != $data['sale_price_dates_to']) {
           WC_Facebookcommerce_Utils::log(
-            'Test - ' . $retailer_id . " doesn\'t match sale price end date.");
+							'Test - ' . $retailer_id . " doesn\'t match sale price end date."
+						);
           $match = false;
         }
       }
 
       if ($body['visibility'] != $data['visibility']) {
         WC_Facebookcommerce_Utils::log(
-          'Test - ' . $retailer_id . " doesn\'t match visibility.");
+						'Test - ' . $retailer_id . " doesn\'t match visibility."
+					);
         $match = false;
       }
 
@@ -339,7 +384,8 @@ class WC_Facebook_Integration_Test {
           $data['additional_variant_attributes']['value'])) {
 
         WC_Facebookcommerce_Utils::log(
-          'Test - ' . $retailer_id . " doesn\'t match variation.");
+						'Test - ' . $retailer_id . " doesn\'t match variation."
+					);
         $match = false;
       }
     }
@@ -355,7 +401,9 @@ class WC_Facebook_Integration_Test {
       if (!$delete_post_result) {
         WC_Facebookcommerce_Utils::log('Test - Fail to delete post ' . $post_id);
         WC_Facebookcommerce_Utils::set_test_fail_reason(
-          'Fail to delete post ' . $post_id, (new Exception)->getTraceAsString());
+						'Fail to delete post ' . $post_id,
+						( new Exception() )->getTraceAsString()
+					);
         $failure = true;
       }
     }
@@ -368,12 +416,15 @@ class WC_Facebook_Integration_Test {
       $group_fbid =
         $this->check_fbid_api(self::FB_PRODUCT_GROUP_ID, $retailer_id);
       if ($item_fbid || $group_fbid) {
-        WC_Facebookcommerce_Utils::log('Test - Failed to delete product ' .
-        $retailer_id . ' via plugin deletion hook.');
+					WC_Facebookcommerce_Utils::log(
+						'Test - Failed to delete product ' .
+						$retailer_id . ' via plugin deletion hook.'
+					);
         WC_Facebookcommerce_Utils::set_test_fail_reason(
           'Failed to delete product ' . $retailer_id .
             ' via plugin deletion hook.',
-          (new Exception)->getTraceAsString());
+						( new Exception() )->getTraceAsString()
+					);
         $failure = true;
       }
     }
@@ -393,8 +444,9 @@ class WC_Facebook_Integration_Test {
         'Accessories', // the term
         'product_cat', // the taxonomy
         array(
-          'slug' => 'accessories'
-        ));
+						'slug' => 'accessories',
+					)
+				);
     }
     $data = array (
       'post_content' => 'This is to test a simple product.',
@@ -479,7 +531,7 @@ class WC_Facebook_Integration_Test {
     // Set up attributes.
     $avail_attribute_values = array(
       'Red',
-      'Blue'
+				'Blue',
     );
     wp_set_object_terms($post_id, $avail_attribute_values, 'pa_color');
     $thedata = array(
@@ -488,8 +540,8 @@ class WC_Facebook_Integration_Test {
         'value' => '',
         'is_visible' => '1',
         'is_variation' => '1',
-        'is_taxonomy' => '1'
-      )
+					'is_taxonomy'  => '1',
+				),
     );
     update_post_meta($post_id, '_product_attributes', $thedata);
 
@@ -507,7 +559,11 @@ class WC_Facebook_Integration_Test {
     }
 
     $this->fb_update_variation_meta(
-      $prod_and_variant_wpid, $variation_red, 'Red', $variation_data);
+				$prod_and_variant_wpid,
+				$variation_red,
+				'Red',
+				$variation_data
+			);
 
     $variation_data['post_content'] = 'a variable product for test - Blue';
     $variation_blue = $this->fb_insert_post($variation_data, 'Variatoin');
@@ -515,7 +571,11 @@ class WC_Facebook_Integration_Test {
       return false;
     }
     $this->fb_update_variation_meta(
-      $prod_and_variant_wpid, $variation_blue, 'Blue', $variation_data);
+				$prod_and_variant_wpid,
+				$variation_blue,
+				'Blue',
+				$variation_data
+			);
     $product = wc_get_product($variation_blue);
     $product->set_stock_status('instock');
     wp_set_object_terms($variation_blue, 'variation', 'product_type');
@@ -543,17 +603,22 @@ class WC_Facebook_Integration_Test {
   function fb_insert_post($data, $p_type) {
     $postarr = array_intersect_key(
       $data,
-      array_flip(array(
+				array_flip(
+					array(
         'post_content',
         'post_title',
         'post_status',
         'post_type',
         'post_parent',
-      )));
+					)
+				)
+			);
     $post_id = wp_insert_post($postarr);
     if (is_wp_error($post_id)) {
-      WC_Facebookcommerce_Utils::log('Test - ' . $p_type .
-      ' product wp_insert_post' . 'failed: ' . json_encode($post_id));
+				WC_Facebookcommerce_Utils::log(
+					'Test - ' . $p_type .
+					' product wp_insert_post' . 'failed: ' . json_encode( $post_id )
+				);
       return false;
     } else {
       return $post_id;

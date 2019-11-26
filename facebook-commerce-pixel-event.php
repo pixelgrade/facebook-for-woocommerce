@@ -23,12 +23,14 @@ class WC_Facebookcommerce_Pixel {
   private $last_event;
   static $render_cache = array();
 
+  // Pixelgrade Modification - changed from t.async=!0 to t.defer=!0
+	// Also changed to inject the script before the last script, not the fist one
   static $default_pixel_basecode = "
 <script type='text/javascript'>
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.defer=!0;
+t.src=v;let tags = b.getElementsByTagName(e); s=tags[tags.length-1];s.parentNode.insertBefore(t,s)}(window,
 document,'script','https://connect.facebook.net/en_US/fbevents.js');
 </script>
 ";
@@ -87,7 +89,8 @@ document,'script','https://connect.facebook.net/en_US/fbevents.js');
     self::$render_cache[self::PIXEL_RENDER] = true;
     $params = self::add_version_info();
 
-    return sprintf("
+			return sprintf(
+				"
 <!-- %s Facebook Integration Begin -->
 %s
 <script>
@@ -113,7 +116,8 @@ document.addEventListener('DOMContentLoaded', function() {
     self::get_basecode(),
     $this->pixel_init_code(),
     json_encode($params, JSON_PRETTY_PRINT | JSON_FORCE_OBJECT),
-    WC_Facebookcommerce_Utils::getIntegrationName());
+				WC_Facebookcommerce_Utils::getIntegrationName()
+			);
   }
 
   /**
@@ -134,14 +138,16 @@ document.addEventListener('DOMContentLoaded', function() {
     if (WC_Facebookcommerce_Utils::isWoocommerceIntegration()) {
       WC_Facebookcommerce_Utils::wc_enqueue_js($code);
     } else {
-      printf("
+				printf(
+					'
 <!-- Facebook Pixel Event Code -->
 <script>
 %s
 </script>
 <!-- End Facebook Pixel Event Code -->
-        ",
-        $code);
+        ',
+					$code
+				);
     }
   }
 
@@ -157,7 +163,8 @@ document.addEventListener('DOMContentLoaded', function() {
         sprintf($this->pixel_init_code(), '" || '.$jsonified_pii.' || "').$code;
     }
 
-    printf("
+			printf(
+				"
 <!-- Facebook Pixel Event Code -->
 <script>
 document.addEventListener('%s', function (event) {
@@ -167,7 +174,8 @@ document.addEventListener('%s', function (event) {
 <!-- End Facebook Pixel Event Code -->
       ",
       $listener,
-      $code);
+				$code
+			);
   }
 
   /**
@@ -188,16 +196,18 @@ document.addEventListener('%s', function (event) {
 
     self::$render_cache[self::NO_SCRIPT_RENDER] = true;
 
-    return sprintf("
+			return sprintf(
+				'
 <!-- Facebook Pixel Code -->
 <noscript>
-<img height=\"1\" width=\"1\" style=\"display:none\" alt=\"fbpx\"
-src=\"https://www.facebook.com/tr?id=%s&ev=PageView&noscript=1\"/>
+<img height="1" width="1" style="display:none" alt="fbpx"
+src="https://www.facebook.com/tr?id=%s&ev=PageView&noscript=1"/>
 </noscript>
 <!-- DO NOT MODIFY -->
 <!-- End Facebook Pixel Code -->
-    ",
-    esc_js($pixel_id));
+    ',
+				esc_js( $pixel_id )
+			);
   }
 
   /**
@@ -212,7 +222,8 @@ src=\"https://www.facebook.com/tr?id=%s&ev=PageView&noscript=1\"/>
       WC_Facebookcommerce_Utils::getIntegrationName(),
       $method,
       $event_name,
-      json_encode($params, JSON_PRETTY_PRINT | JSON_FORCE_OBJECT));
+				json_encode( $params, JSON_PRETTY_PRINT | JSON_FORCE_OBJECT )
+			);
   }
 
   public static function get_pixel_id() {
@@ -268,22 +279,25 @@ src=\"https://www.facebook.com/tr?id=%s&ev=PageView&noscript=1\"/>
       return array(
         'source' => 'woocommerce',
         'version' => WC()->version,
-        'pluginVersion' => WC_Facebookcommerce_Utils::PLUGIN_VERSION
+					'pluginVersion' => WC_Facebookcommerce_Utils::PLUGIN_VERSION,
       );
     }
 
     return array(
       'source' => 'wordpress',
       'version' => $wp_version,
-      'pluginVersion' => WC_Facebookcommerce_Utils::PLUGIN_VERSION
+				'pluginVersion' => WC_Facebookcommerce_Utils::PLUGIN_VERSION,
     );
   }
 
   public static function get_options() {
-    return get_option(self::SETTINGS_KEY, array(
+			return get_option(
+				self::SETTINGS_KEY,
+				array(
       self::PIXEL_ID_KEY => '0',
       self::USE_PII_KEY => 0,
-    ));
+				)
+			);
   }
 
   /**
@@ -306,16 +320,22 @@ src=\"https://www.facebook.com/tr?id=%s&ev=PageView&noscript=1\"/>
       '%s-%s-%s',
       $version_info['source'],
       $version_info['version'],
-      $version_info['pluginVersion']);
+				$version_info['pluginVersion']
+			);
 
     $params = array(
-      'agent' => $agent_string);
+				'agent' => $agent_string,
+			);
 
-    return apply_filters('facebook_woocommerce_pixel_init', sprintf(
+			return apply_filters(
+				'facebook_woocommerce_pixel_init',
+				sprintf(
       "fbq('init', '%s', %s, %s);\n",
       esc_js(self::get_pixel_id()),
       json_encode($this->user_info, JSON_PRETTY_PRINT | JSON_FORCE_OBJECT),
-      json_encode($params, JSON_PRETTY_PRINT | JSON_FORCE_OBJECT)));
+					json_encode( $params, JSON_PRETTY_PRINT | JSON_FORCE_OBJECT )
+				)
+			);
   }
 
 }

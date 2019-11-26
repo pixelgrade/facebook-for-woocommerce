@@ -41,10 +41,13 @@ function openPopup() {
   var page = window.open(popupUrl + '/login.php?display=popup&next=' + encodeURIComponent(popupUrl + path + '?origin=' + window.originParam + ' &merchant_settings_id=' + window.facebookAdsToolboxConfig.diaSettingId), 'DiaWizard', ['toolbar=no', 'location=no', 'directories=no', 'status=no', 'menubar=no', 'scrollbars=no', 'resizable=no', 'copyhistory=no', 'width=' + width, 'height=' + height, 'top=' + topPos, 'left=' + leftPos].join(','));
 
   return function (type, params) {
-    page.postMessage({
+		page.postMessage(
+			{
       type: type,
       params: params
-    }, window.facebookAdsToolboxConfig.popupOrigin);
+			},
+			window.facebookAdsToolboxConfig.popupOrigin
+		);
   };
 }
 
@@ -80,24 +83,31 @@ function get_ems_id_box() {
  *  Takes optional payload for POST and optional callback.
  */
 function ajax(action, payload = null, callback = null, failcallback = null) {
-  var data = {
+	var data = Object.assign(
+		{},
+		{
     'action': action,
-  };
-  if (payload){
-    for (var attrname in payload) { data[attrname] = payload[attrname]; }
-  }
+		},
+		payload
+	);
 
   // Since  Wordpress 2.8 ajaxurl is always defined in admin header and
   // points to admin-ajax.php
-  jQuery.post(ajaxurl, data, function(response) {
+	jQuery.post(
+		ajaxurl,
+		data,
+		function(response) {
     if(callback) {
       callback(response);
     }
-  }).fail(function(errorResponse){
+		}
+	).fail(
+		function(errorResponse){
     if(failcallback) {
       failcallback(errorResponse);
     }
-  });
+		}
+	);
 }
 
 var settings = {'facebook_for_woocommerce' : 1};
@@ -110,7 +120,14 @@ function facebookConfig() {
 
 function fb_flush(){
   console.log("Removing all FBIDs from all products!");
-  return ajax('ajax_reset_all_fb_products');
+	return ajax(
+		 'ajax_reset_all_fb_products',
+		 {"_ajax_nonce": wc_facebook_settings_jsx.nonce},
+		 null,
+		 function fb_flushFailCallback(error) {
+			 console.log('Failed to reset all FB products');
+		 }
+	 );
 }
 
 function sync_confirm(verbose = null) {
@@ -163,9 +180,19 @@ function sync_all_products($using_feed = false, $is_test = false) {
     window.feed_upload = true;
     ping_feed_status_queue();
     return $is_test ? ajax('ajax_test_sync_products_using_feed')
-      : ajax('ajax_sync_all_fb_products_using_feed');
+		: ajax(
+			'ajax_sync_all_fb_products_using_feed',
+			{
+				"_ajax_nonce": wc_facebook_settings_jsx.nonce,
+			},
+		);
   } else {
-    return ajax('ajax_sync_all_fb_products');
+		return ajax(
+			'ajax_sync_all_fb_products',
+			{
+        "_ajax_nonce": wc_facebook_settings_jsx.nonce,
+      }
+		);
   }
 }
 
@@ -197,7 +224,14 @@ function delete_all_settings(callback = null, failcallback = null) {
   window.fb_connected = false;
 
   console.log('Deleting all settings and removing all FBIDs!');
-  return ajax('ajax_delete_fb_settings', null, callback, failcallback);
+	return ajax(
+		'ajax_delete_fb_settings',
+		{
+			"_ajax_nonce": wc_facebook_settings_jsx.nonce,
+		},
+		callback,
+		failcallback
+	);
 }
 
 // save_settings and save_settings_and_sync should only be called once
@@ -210,7 +244,10 @@ function save_settings(callback = null, failcallback = null, localsettings = nul
   if (!localsettings) {
     localsettings = settings;
   }
-  ajax('ajax_save_fb_settings', localsettings,
+	localsettings["_ajax_nonce"] = wc_facebook_settings_jsx.nonce;
+	ajax(
+		'ajax_save_fb_settings',
+		localsettings,
     function(response){
       if(callback) {
         callback(response);
@@ -242,7 +279,8 @@ function save_settings_for_plugin(callback, failcallback) {
     function(errorResponse){
       console.log('Ajax error while saving settings:' + JSON.stringify(errorResponse));
       failcallback(errorResponse);
-    });
+		}
+	);
 }
 
 // see comments in save_settings function above
@@ -343,9 +381,11 @@ function sync_not_in_progress(){
     cta_element.style.width = '60px';
     if (window.facebookAdsToolboxConfig.diaSettingId) {
     cta_element.onclick= function() {
-      window.open('https://www.facebook.com/ads/dia/redirect/?settings_id=' +
+				window.open(
+					'https://www.facebook.com/ads/dia/redirect/?settings_id=' +
         window.facebookAdsToolboxConfig.diaSettingId + '&version=2' +
-        '&entry_point=admin_panel');
+					'&entry_point=admin_panel'
+				);
       };
     } else {
       cta_element.style['pointer-events'] = 'none';
@@ -491,8 +531,10 @@ function genFeed(message) {
 
 function setAccessTokenAndPageId(message) {
   if (!message.params.page_token) {
-    console.error('Facebook Ads Extension Error: got no page_token',
-      message.params);
+		console.error(
+			'Facebook Ads Extension Error: got no page_token',
+			message.params
+		);
     window.sendToFacebook('fail set page access token', message.params);
     return;
   }
@@ -561,7 +603,8 @@ function iFrameListener(event) {
 
   switch (event.data.type) {
     case 'reset':
-      delete_all_settings(function(res){
+			delete_all_settings(
+				function(res){
         if(res && event.data.params) {
           if(res === 'Settings Deleted'){
             window.sendToFacebook('ack reset', event.data.params);
@@ -572,9 +615,11 @@ function iFrameListener(event) {
         }else {
           console.log("Got no response from delete_all_settings");
         }
-      },function(err){
+				},
+				function(err){
           console.error(err);
-      });
+				}
+			);
       break;
     case 'get dia settings':
       window.sendToFacebook('dia settings', window.diaConfig);
@@ -604,7 +649,8 @@ function iFrameListener(event) {
         },
         function(response) {
           window.sendToFacebook('fail ack msger chat', event.data);
-        });
+				}
+			);
       break;
   }
 }
@@ -632,16 +678,22 @@ function parseURL(url) {
 window.fb_pings =
 (window.facebookAdsToolboxConfig.feed.hasClientSideFeedUpload) ?
 null :
-setInterval(function(){
+setInterval(
+	function(){
   console.log("Pinging queue...");
   check_queues();
-}, 10000);
+	},
+	10000
+);
 
 function ping_feed_status_queue(count = 0) {
-  window.fb_feed_pings = setInterval(function() {
+	window.fb_feed_pings = setInterval(
+		function() {
     console.log('Pinging feed uploading queue...');
     check_feed_upload_queue(count);
-  }, 30000*(1 << count));
+		},
+		30000 * (1 << count)
+	);
 }
 
 function product_sync_complete(sync_progress_element){
@@ -656,8 +708,13 @@ function product_sync_complete(sync_progress_element){
 }
 
 function check_queues(){
-  ajax('ajax_fb_background_check_queue',
-    {"request_time": new Date().getTime()}, function(response){
+	ajax(
+		'ajax_fb_background_check_queue',
+		{
+			"request_time": new Date().getTime(),
+			"_ajax_nonce": wc_facebook_settings_jsx.nonce,
+		},
+		function( response ) {
     if (window.feed_upload) {
       clearInterval(window.fb_pings);
       return;
@@ -705,7 +762,8 @@ function check_queues(){
           }
        }
     }
-  });
+		}
+	);
 }
 
 function parse_response_check_connection(res) {
@@ -723,7 +781,12 @@ function parse_response_check_connection(res) {
 }
 
 function check_feed_upload_queue(check_num) {
-  ajax('ajax_check_feed_upload_status', null, function(response) {
+	ajax(
+		'ajax_check_feed_upload_status',
+		{
+			"_ajax_nonce": wc_facebook_settings_jsx.nonce,
+		},
+		function(response) {
     var sync_progress_element = document.querySelector('#sync_progress');
     var res = parse_response_check_connection(response);
     clearInterval(window.fb_feed_pings);
@@ -755,11 +818,17 @@ function check_feed_upload_queue(check_num) {
           }
       }
     }
-  });
+		}
+	);
 }
 
 function display_test_result() {
-  ajax('ajax_display_test_result', null, function(response) {
+	ajax(
+		'ajax_display_test_result',
+		{
+			"_ajax_nonce": wc_facebook_settings_jsx.nonce
+		},
+		function(response) {
     var sync_complete_element = document.querySelector('#sync_complete');
     var sync_progress_element = document.querySelector('#sync_progress');
     var res = parse_response_check_connection(response);
@@ -801,7 +870,8 @@ function display_test_result() {
           window.is_test = false;
       }
     }
-  });
+		}
+	);
 }
 
 function show_debug_info() {
@@ -817,24 +887,33 @@ function show_debug_info() {
 
 function fbe_init_nux_messages() {
   var jQuery = window.jQuery;
-  jQuery(function() {
-    jQuery.each(jQuery('.nux-message'), function(_index, nux_msg) {
+	jQuery(
+		function() {
+			jQuery.each(
+				jQuery( '.nux-message' ),
+				function(_index, nux_msg) {
       var nux_msg_elem = jQuery(nux_msg);
       var targetid = nux_msg_elem.data('target');
       var target_elem = jQuery('#' + targetid);
       var t_pos = target_elem.position();
       var t_half_height = target_elem.height() / 2;
       var t_width = target_elem.outerWidth();
-      nux_msg_elem.css({
+					nux_msg_elem.css(
+						{
         'top': '' + Math.ceil(t_pos.top + t_half_height) + 'px',
         'left': '' + Math.ceil(t_pos.left + t_width) + 'px',
         'display': 'block'
-      });
-      jQuery('.nux-message-close-btn', nux_msg_elem).click(function() {
+						}
+					);
+					jQuery( '.nux-message-close-btn', nux_msg_elem ).click(
+						function() {
         jQuery(nux_msg).hide();
-      });
-    });
-  });
+						}
+					);
+				}
+			);
+		}
+	);
 }
 
 function saveAutoSyncSchedule() {
@@ -850,13 +929,22 @@ function saveAutoSyncSchedule() {
       saved.style.transition = '';
       saved.style.opacity = 1;
       // Fade out the small 'Saved' after 3 seconds.
-      setTimeout(function() {
+		setTimeout(
+			function() {
         saved.style.opacity = 0;
         saved.style.transition = 'opacity 5s';}
-        ,3000);
+			,
+			3000
+		);
     }
 
-    ajax('ajax_schedule_force_resync', {"enabled": isChecked ? 1 : 0, "time": timebox.value});
+	ajax( 'ajax_schedule_force_resync',
+	 {
+		 "enabled": isChecked ? 1 : 0,
+		 "time" : timebox.value,
+		 "_ajax_nonce": wc_facebook_settings_jsx.nonce,
+	 }
+ );
 }
 
 function onSetDisableSyncOnDevEnvironment() {
@@ -865,7 +953,15 @@ function onSetDisableSyncOnDevEnvironment() {
     'ajax_update_fb_option',
     {
       "option": "fb_disable_sync_on_dev_environment",
-      "option_value": isChecked ? 1 : 0
+			"option_value": isChecked ? 1 : 0,
+			"_ajax_nonce": wc_facebook_settings_jsx.nonce,
+		},
+		null,
+        function onSetDisableSyncOnDevEnvironmentFailCallback(error) {
+		document.getElementsByClassName(
+            'onSetDisableSyncOnDevEnvironment'
+		)[0].checked = ! isChecked;
+		console.log( 'Failed to disable sync on dev environment' );
     }
   );
 }
@@ -876,7 +972,13 @@ function syncShortDescription() {
     'ajax_update_fb_option',
     {
       "option": "fb_sync_short_description",
-      "option_value": isChecked ? 1 : 0
+			"option_value": isChecked ? 1 : 0,
+			"_ajax_nonce": wc_facebook_settings_jsx.nonce,
+		},
+		null,
+	function syncShortDescriptionFailCallback(error) {
+		document.getElementsByClassName( 'syncShortDescription' )[0].checked = ! isChecked;
+		console.log( 'Failed to sync Short Description' );
     }
   );
 }

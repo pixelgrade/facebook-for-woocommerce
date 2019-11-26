@@ -55,7 +55,7 @@ class WC_Facebook_WPML_Injector {
     if (isset($REQUEST['icl_ajx_action'])) {
       $call = $REQUEST['icl_ajx_action'];
     }
-    if ($call === "icl_fb_woo") {
+			if ( $call === 'icl_fb_woo' ) {
       $active_languages = array_keys($sitepress->get_active_languages());
       $settings = array();
       foreach ($active_languages as $lang) {
@@ -77,18 +77,21 @@ class WC_Facebook_WPML_Injector {
       // Default setting is only show default lang.
       if (!$settings) {
         $settings = array_fill_keys(
-          array_keys($active_languages), FB_WPML_Language_Status::HIDDEN);
+						array_keys( $active_languages ),
+						FB_WPML_Language_Status::HIDDEN
+					);
         $settings[self::$default_lang] = FB_WPML_Language_Status::VISIBLE;
       }
       $ajax_response = sprintf(
         'Saved. You should now '.
         ' <a href="%s&fb_force_resync=true">Re-Sync</a>'.
         ' your products with Facebook. ',
-        WOOCOMMERCE_FACEBOOK_PLUGIN_SETTINGS_URL);
+					WOOCOMMERCE_FACEBOOK_PLUGIN_SETTINGS_URL
+				);
 
       ?><div id="lang-sec-fb" class="wpml-section wpml-section-languages">
           <div class="wpml-section-header">
-              <h3><?php _e('Facebook Visibility', 'sitepress') ?></h3>
+			  <h3><?php _e( 'Facebook Visibility', 'sitepress' ); ?></h3>
           </div>
           <div class="wpml-section-content">
             WooCommerce Products with languages that are selected
@@ -111,11 +114,11 @@ class WC_Facebook_WPML_Injector {
                 ?>
               <p class="buttons-wrap">
                 <span class="icl_ajx_response_fb" id="icl_ajx_response_fb" hidden="true">
-                  <?php echo $ajax_response ?>
+				  <?php echo $ajax_response; ?>
                 </span>
                 <input class="button button-primary"
                        name="save"
-                       value="<?php _e('Save', 'sitepress') ?>"
+					   value="<?php _e( 'Save', 'sitepress' ); ?>"
                        type="submit" />
               </p>
               </form>
@@ -129,7 +132,8 @@ class WC_Facebook_WPML_Injector {
               </script>
             </div>
           </div>
-      </div><?php
+	  </div>
+				<?php
     }
   }
 }

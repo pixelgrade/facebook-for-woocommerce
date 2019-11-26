@@ -46,7 +46,8 @@ class WC_Facebookcommerce_MessengerChat {
 
   public function inject_messenger_chat_plugin() {
     if ($this->enabled === 'yes') {
-      echo sprintf("<div
+				echo sprintf(
+					"<div
   attribution=\"fbe_woocommerce\"
   class=\"fb-customerchat\"
   page_id=\"%s\"
@@ -78,7 +79,8 @@ class WC_Facebookcommerce_MessengerChat {
         $this->greeting_text_code ? sprintf('logged_in_greeting="%s"', $this->greeting_text_code) : '',
         $this->greeting_text_code ? sprintf('logged_out_greeting="%s"', $this->greeting_text_code) : '',
         $this->jssdk_version,
-        $this->locale ? $this->locale : 'en_US');
+					$this->locale ? $this->locale : 'en_US'
+				);
     }
   }
 

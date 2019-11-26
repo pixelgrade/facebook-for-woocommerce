@@ -20,7 +20,6 @@ if (!class_exists('WC_Facebookcommerce_Graph_API')) :
 
 /**
  * FB Graph API helper functions
- *
  */
 class WC_Facebookcommerce_Graph_API {
   const GRAPH_API_URL = 'https://graph.facebook.com/v2.9/';
@@ -40,12 +39,15 @@ class WC_Facebookcommerce_Graph_API {
 
   public function _get($url, $api_key = '') {
     $api_key = $api_key ?: $this->api_key;
-    return wp_remote_get($url, array(
+			return wp_remote_get(
+				$url,
+				array(
         'headers' => array(
             'Authorization' => 'Bearer ' . $api_key,
         ),
         'timeout' => self::CURL_TIMEOUT,
-    ));
+				)
+			);
   }
 
   public function _post($url, $data, $api_key = '') {
@@ -58,13 +60,16 @@ class WC_Facebookcommerce_Graph_API {
 
   public function _post_sync($url, $data, $api_key = '') {
     $api_key = $api_key ?: $this->api_key;
-    return wp_remote_post($url, array(
+			return wp_remote_post(
+				$url,
+				array(
         'body'    => $data,
         'headers' => array(
             'Authorization' => 'Bearer ' . $api_key,
         ),
         'timeout' => self::CURL_TIMEOUT,
-    ));
+				)
+			);
   }
 
   public function _post_async($url, $data, $api_key = '') {
@@ -91,13 +96,16 @@ class WC_Facebookcommerce_Graph_API {
   public function _delete($url, $api_key = '') {
     $api_key = $api_key ?: $this->api_key;
 
-    return wp_remote_request($url, array(
+			return wp_remote_request(
+				$url,
+				array(
         'headers' => array(
             'Authorization' => 'Bearer ' . $api_key,
         ),
         'timeout' => self::CURL_TIMEOUT,
         'method' => 'DELETE',
-    ));
+				)
+			);
   }
 
   // GET https://graph.facebook.com/vX.X/{page-id}/?fields=name
@@ -165,7 +173,7 @@ class WC_Facebookcommerce_Graph_API {
 
     $data = array(
       'message'=> $message,
-      'error' => $error
+				'error'   => $error,
     );
 
     self::_post($log_url, $data);
@@ -177,7 +185,7 @@ class WC_Facebookcommerce_Graph_API {
     $data = array(
       'tip_id' => $tip_id,
       'channel_id' => $channel_id,
-      'event' => $event
+				'event'      => $event,
     );
 
     self::_post($tip_event_log_url, $data);
@@ -186,9 +194,10 @@ class WC_Facebookcommerce_Graph_API {
   public function create_upload($facebook_feed_id, $path_to_feed_file) {
     $url = $this->build_url(
       $facebook_feed_id,
-      '/uploads?access_token=' . $this->api_key);
+				'/uploads?access_token=' . $this->api_key
+			);
     $data = array(
-      'file' => new CurlFile($path_to_feed_file, 'text/csv')
+				'file' => new CurlFile( $path_to_feed_file, 'text/csv' ),
     );
     $curl = curl_init();
     curl_setopt_array(
@@ -197,7 +206,9 @@ class WC_Facebookcommerce_Graph_API {
         CURLOPT_URL => $url,
         CURLOPT_POST => 1,
         CURLOPT_POSTFIELDS => $data,
-        CURLOPT_RETURNTRANSFER => 1));
+					CURLOPT_RETURNTRANSFER => 1,
+				)
+			);
     $response = curl_exec($curl);
     if (curl_errno($curl)) {
       WC_Facebookcommerce_Utils::fblog($response);
@@ -233,7 +244,8 @@ class WC_Facebookcommerce_Graph_API {
       WC_Facebookcommerce_Utils::fblog(
         'Failed to get AYMT tip info via API.',
         $data,
-        true);
+					true
+				);
       return;
     }
     if ($response['response']['code'] != '200') {
@@ -241,7 +253,8 @@ class WC_Facebookcommerce_Graph_API {
       WC_Facebookcommerce_Utils::fblog(
         'Failed to get AYMT tip info via API.',
         $data,
-        true);
+					true
+				);
       return;
     }
 
@@ -251,9 +264,10 @@ class WC_Facebookcommerce_Graph_API {
     if (!isset($connect_woo)) {
       $data['error_type'] = 'Response body not set';
       WC_Facebookcommerce_Utils::fblog(
-        "Failed to get AYMT tip info via API.",
+					'Failed to get AYMT tip info via API.',
         $data,
-        true);
+					true
+				);
     }
     return $connect_woo;
   }

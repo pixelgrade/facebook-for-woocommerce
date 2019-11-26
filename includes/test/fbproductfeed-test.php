@@ -12,8 +12,8 @@ if (! defined('ABSPATH')) {
   exit;
 }
 
-include_once(dirname(__DIR__) . '/fbproductfeed.php');
-include_once(dirname(__DIR__) . '/fbutils.php');
+require_once dirname( __DIR__ ) . '/fbproductfeed.php';
+require_once dirname( __DIR__ ) . '/fbutils.php';
 
 if (! class_exists('WC_Facebook_Product_Feed_Test')) :
 /**

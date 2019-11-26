@@ -10,7 +10,7 @@
  * Description: Grow your business on Facebook! Use this official plugin to help sell more of your products using Facebook. After completing the setup, you'll be ready to create ads that promote your products and you can also create a shop section on your Page where customers can browse your products on Facebook.
  * Author: Facebook
  * Author URI: https://www.facebook.com/
- * Version: 1.9.12-modified
+ * Version: 1.9.15-modified
  * Woo: 2127297:0ea4fe4c2d7ca6338f8a322fb3e4e187
  * Text Domain: facebook-for-woocommerce
  * WC requires at least: 3.0.0
@@ -40,8 +40,10 @@ class WC_Facebookcommerce {
    */
   public function init() {
     if (is_admin()) {
-      add_filter('plugin_action_links_'.plugin_basename(__FILE__),
-        array($this, 'add_settings_link'));
+				add_filter(
+					'plugin_action_links_' . plugin_basename( __FILE__ ),
+					array( $this, 'add_settings_link' )
+				);
     }
 
     if (WC_Facebookcommerce_Utils::isWoocommerceIntegration()) {
@@ -50,15 +52,19 @@ class WC_Facebookcommerce {
                 'WOOCOMMERCE_FACEBOOK_PLUGIN_SETTINGS_URL',
                 get_admin_url()
                 .'/admin.php?page=wc-settings&tab=integration'
-                .'&section=facebookcommerce');
+						. '&section=facebookcommerce'
+					);
       }
       include_once 'facebook-commerce.php';
 
       // Register WooCommerce integration.
-      add_filter('woocommerce_integrations', array(
+				add_filter(
+					'woocommerce_integrations',
+					array(
         $this,
-        'add_woocommerce_integration'
-      ));
+						'add_woocommerce_integration',
+					)
+				);
     }
   }
 
@@ -67,7 +73,8 @@ class WC_Facebookcommerce {
       'settings' => sprintf(
         '<a href="%s">%s</a>',
         admin_url('admin.php?page=wc-settings&tab=integration&section=facebookcommerce'),
-        'Settings')
+					'Settings'
+				),
     );
     return array_merge($settings, $links);
   }
@@ -77,10 +84,14 @@ class WC_Facebookcommerce {
     <div class="error below-h3">
       <p>
       <?php
-        printf(__('To use Facebook for WooCommerce,
+			printf(
+				__(
+					'To use Facebook for WooCommerce,
           please disable WP_DEBUG_DISPLAY in your wp-config.php file.
           Contact your server administrator for more assistance.',
-          'facebook-for-woocommerce'));
+					'facebook-for-woocommerce'
+				)
+			);
        ?>
       </p>
     </div>

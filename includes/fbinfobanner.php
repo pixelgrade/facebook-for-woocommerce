@@ -46,7 +46,8 @@ class WC_Facebookcommerce_Info_Banner {
       ? (self::$instance = new self(
         $external_merchant_settings_id,
         $fbgraph,
-        $should_query_tip))
+				$should_query_tip
+			) )
       : self::$instance;
   }
 
@@ -72,7 +73,9 @@ class WC_Facebookcommerce_Info_Banner {
    function ajax_woo_infobanner_post_click() {
      WC_Facebookcommerce_Utils::check_woo_ajax_permissions(
        'post tip click event',
-       true);
+				true
+			);
+			check_ajax_referer( 'wc_facebook_infobanner_jsx' );
     $tip_info = WC_Facebookcommerce_Utils::get_cached_best_tip();
     $tip_id = isset($tip_info->tip_id)
       ? $tip_info->tip_id
@@ -81,12 +84,14 @@ class WC_Facebookcommerce_Info_Banner {
        WC_Facebookcommerce_Utils::fblog(
          'Do not have tip id when click, sth went wrong',
          array('tip_info' => $tip_info),
-         true);
+					true
+				);
      } else {
        WC_Facebookcommerce_Utils::tip_events_log(
          $tip_id,
          self::CHANNEL_ID,
-         'click');
+					'click'
+				);
      }
    }
 
@@ -96,7 +101,9 @@ class WC_Facebookcommerce_Info_Banner {
    function ajax_woo_infobanner_post_xout() {
      WC_Facebookcommerce_Utils::check_woo_ajax_permissions(
        'post tip xout event',
-       true);
+				true
+			);
+			check_ajax_referer( 'wc_facebook_infobanner_jsx' );
      $tip_info = WC_Facebookcommerce_Utils::get_cached_best_tip();
      $tip_id = isset($tip_info->tip_id)
        ? $tip_info->tip_id
@@ -107,12 +114,14 @@ class WC_Facebookcommerce_Info_Banner {
        WC_Facebookcommerce_Utils::fblog(
          'Do not have tip id when xout, sth went wrong',
          array('tip_info' => $tip_info),
-         true);
+					true
+				);
      } else {
        WC_Facebookcommerce_Utils::tip_events_log(
          $tip_id,
          self::CHANNEL_ID,
-         'xout');
+					'xout'
+				);
      }
    }
 
@@ -121,8 +130,14 @@ class WC_Facebookcommerce_Info_Banner {
    */
   public function banner() {
     $screen = get_current_screen();
-    if (!in_array($screen->base, array('woocommerce_page_wc-reports',
-      'woocommerce_page_wc-settings', 'woocommerce_page_wc-status')) ||
+			if ( ! in_array(
+				$screen->base,
+				array(
+					'woocommerce_page_wc-reports',
+					'woocommerce_page_wc-settings',
+					'woocommerce_page_wc-status',
+				)
+			) ||
       $screen->is_network || $screen->action) {
       return;
     }
@@ -134,7 +149,8 @@ class WC_Facebookcommerce_Info_Banner {
       $tip_info = WC_Facebookcommerce_Utils::get_cached_best_tip();
     } else {
       $tip_info = $this->fbgraph->get_tip_info(
-        $this->external_merchant_settings_id);
+					$this->external_merchant_settings_id
+				);
       update_option('fb_info_banner_last_query_time', current_time('mysql'));
     }
 
@@ -173,12 +189,15 @@ class WC_Facebookcommerce_Info_Banner {
         WC_Facebookcommerce_Utils::fblog(
           'Unexpected response from FB for tip info.',
           array('tip_info' => $tip_info),
-          true);
+						true
+					);
         return;
       }
-      update_option('fb_info_banner_last_best_tip',
+				update_option(
+					'fb_info_banner_last_best_tip',
         is_object($tip_info) || is_array($tip_info)
-        ? json_encode($tip_info) : $tip_info);
+					? json_encode( $tip_info ) : $tip_info
+				);
     }
 
     $dismiss_url = $this->dismiss_url();
@@ -197,16 +216,20 @@ class WC_Facebookcommerce_Info_Banner {
 
   /**
    * Returns the url that the user clicks to remove the info banner
+		 *
    * @return (string)
    */
   private function dismiss_url() {
     $url = admin_url('admin.php');
 
-    $url = add_query_arg(array(
+			$url = add_query_arg(
+				array(
       'page'      => 'wc-settings',
       'tab'       => 'integration',
       'wc-notice' => 'dismiss-fb-info-banner',
-    ), $url);
+				),
+				$url
+			);
 
     return wp_nonce_url($url, 'woocommerce_info_banner_dismiss');
   }

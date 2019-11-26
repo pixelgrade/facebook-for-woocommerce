@@ -37,7 +37,11 @@ class WC_Facebook_Product {
   const MAX_TIME = 'T23:59+00:00';
   const MIN_TIME = 'T00:00+00:00';
 
-  static $use_checkout_url = array('simple' => 1, 'variable' => 1, 'variation' => 1);
+		static $use_checkout_url = array(
+			'simple'    => 1,
+			'variable'  => 1,
+			'variation' => 1,
+		);
 
   public function __construct(
     $wpid, $parent_product = null) {
@@ -57,7 +61,8 @@ class WC_Facebook_Product {
       $this->gallery_urls = $parent_product->get_gallery_urls();
       $this->fb_use_parent_image = $parent_product->get_use_parent_image();
       $this->main_description = WC_Facebookcommerce_Utils::clean_string(
-        $parent_product->get_description());
+					$parent_product->get_description()
+				);
     }
   }
 
@@ -75,7 +80,8 @@ class WC_Facebook_Product {
       WC_Facebookcommerce_Utils::fblog(
         "Calling $function on Null Woo Object. Trace:\n".$backtrace,
         array(),
-        true);
+					true
+				);
       return null;
     }
   }
@@ -91,8 +97,10 @@ class WC_Facebook_Product {
       foreach ($image_ids as $image_id) {
         $image_url = wp_get_attachment_url($image_id);
         if (!empty($image_url)) {
-          array_push($gallery_urls,
-            WC_Facebookcommerce_Utils::make_url($image_url));
+						array_push(
+							$gallery_urls,
+							WC_Facebookcommerce_Utils::make_url( $image_url )
+						);
         }
       }
       $this->gallery_urls = array_filter($gallery_urls);
@@ -118,7 +126,8 @@ class WC_Facebook_Product {
     $price = get_post_meta(
       $this->id,
       self::FB_PRODUCT_PRICE,
-      true);
+				true
+			);
 
     if (is_numeric($price)) {
       return intval(round($price * 100));
@@ -156,7 +165,8 @@ class WC_Facebook_Product {
     $image_urls = array();
     $parent_image_id = $this->get_parent_image_id();
     $image_url = wp_get_attachment_url(
-      ($parent_image_id) ?: $this->woo_product->get_image_id());
+				( $parent_image_id ) ?: $this->woo_product->get_image_id()
+			);
 
     if ($image_url) {
       $image_url = WC_Facebookcommerce_Utils::make_url($image_url);
@@ -210,12 +220,14 @@ class WC_Facebook_Product {
 
   public function set_description($description) {
     $description = stripslashes(
-      WC_Facebookcommerce_Utils::clean_string($description));
+				WC_Facebookcommerce_Utils::clean_string( $description )
+			);
     $this->fb_description = $description;
     update_post_meta(
       $this->id,
       self::FB_PRODUCT_DESCRIPTION,
-      $description);
+				$description
+			);
   }
 
   public function set_product_image($image) {
@@ -225,7 +237,8 @@ class WC_Facebook_Product {
       update_post_meta(
        $this->id,
        self::FB_PRODUCT_IMAGE,
-       $image);
+					$image
+				);
     }
   }
 
@@ -235,11 +248,13 @@ class WC_Facebook_Product {
       update_post_meta(
         $this->id,
         self::FB_PRODUCT_PRICE,
-        $price);
+					$price
+				);
     } else {
       delete_post_meta(
         $this->id,
-        self::FB_PRODUCT_PRICE);
+					self::FB_PRODUCT_PRICE
+				);
     }
   }
 
@@ -268,7 +283,8 @@ class WC_Facebook_Product {
     $description = get_post_meta(
       $this->id,
       self::FB_PRODUCT_DESCRIPTION,
-      true);
+				true
+			);
 
     if ($description) {
       return $description;
@@ -276,7 +292,8 @@ class WC_Facebook_Product {
 
     if (WC_Facebookcommerce_Utils::is_variation_type($this->woo_product->get_type())) {
       $description = WC_Facebookcommerce_Utils::clean_string(
-        $this->get_description());
+					$this->get_description()
+				);
       if ($description) {
         return $description;
       }
@@ -288,11 +305,14 @@ class WC_Facebook_Product {
     $post = $this->get_post_data();
 
     $post_content = WC_Facebookcommerce_Utils::clean_string(
-      $post->post_content);
+				$post->post_content
+			);
     $post_excerpt = WC_Facebookcommerce_Utils::clean_string(
-      $post->post_excerpt);
+				$post->post_excerpt
+			);
     $post_title = WC_Facebookcommerce_Utils::clean_string(
-      $post->post_title);
+				$post->post_title
+			);
 
     // Sanitize description
     if ($post_content) {
@@ -347,23 +367,28 @@ class WC_Facebook_Product {
     $hidden_from_catalog = has_term(
       'exclude-from-catalog',
       'product_visibility',
-      $wpid);
+				$wpid
+			);
     $hidden_from_search = has_term(
       'exclude-from-search',
       'product_visibility',
-      $wpid);
+				$wpid
+			);
     // fb_visibility === '': after initial sync by feed
     // fb_visibility === false: set hidden on FB metadata
     // Explicitly check whether flip 'hide' before.
-    return apply_filters( 'fb_for_woocommerce_product_is_hidden', ($hidden_from_catalog && $hidden_from_search) ||
-      $this->fb_visibility === false || !$this->get_fb_price(), $wpid, $this );
+			return ( $hidden_from_catalog && $hidden_from_search ) ||
+			$this->fb_visibility === false || ! $this->get_fb_price();
   }
 
   public function get_price_plus_tax($price) {
     $woo_product = $this->woo_product;
     // // wc_get_price_including_tax exist for Woo > 2.7
     if (function_exists('wc_get_price_including_tax')) {
-      $args = array( 'qty' => 1, 'price' => $price);
+				$args = array(
+					'qty'   => 1,
+					'price' => $price,
+				);
       return get_option('woocommerce_tax_display_shop') === 'incl'
               ? wc_get_price_including_tax($woo_product, $args)
               : wc_get_price_excluding_tax($woo_product, $args);
@@ -387,7 +412,8 @@ class WC_Facebook_Product {
         }
         return $slug_name;
       },
-      $option_values);
+				$option_values
+			);
   }
 
   public function get_variant_option_name($label, $default_value) {
@@ -433,10 +459,10 @@ class WC_Facebook_Product {
     if (class_exists('WC_Data_Store')) {
       //  for >= woo 3.0.0
       $data_store = WC_Data_Store::load('product');
-      return
-        $data_store->find_matching_product_variation(
+				return $data_store->find_matching_product_variation(
           $this,
-          $default_attributes);
+					$default_attributes
+				);
     } else {
       return $this->get_matching_variation($default_attributes);
     }
@@ -454,11 +480,12 @@ class WC_Facebook_Product {
     }
     $image_urls = $this->get_all_image_urls();
 
-    // Replace Wordpress sanitization's ampersand with a real ampersand.
+			// Replace WordPress sanitization's ampersand with a real ampersand.
     $product_url = str_replace(
       '&amp%3B',
       '&',
-      html_entity_decode($this->get_permalink()));
+				html_entity_decode( $this->get_permalink() )
+			);
 
     // Use product_url for external/bundle product setting.
     $product_type = $this->get_type();
@@ -472,21 +499,23 @@ class WC_Facebook_Product {
       }
 
       $checkout_url = WC_Facebookcommerce_Utils::make_url(
-        wc_get_cart_url() . $char);
+					wc_get_cart_url() . $char
+				);
 
       if (WC_Facebookcommerce_Utils::is_variation_type($this->get_type())) {
         $query_data = array(
           'add-to-cart' => $this->get_parent_id(),
-          'variation_id' => $this->get_id()
+						'variation_id' => $this->get_id(),
         );
 
         $query_data = array_merge(
           $query_data,
-          $this->get_variation_attributes());
+						$this->get_variation_attributes()
+					);
 
       } else {
         $query_data = array(
-          'add-to-cart' => $this->get_id()
+						'add-to-cart' => $this->get_id(),
         );
       }
 
@@ -509,7 +538,8 @@ class WC_Facebook_Product {
 
     $product_data = array(
       'name' => WC_Facebookcommerce_Utils::clean_string(
-        $this->get_title()),
+					$this->get_title()
+				),
       'description' => $this->get_fb_description(),
       'image_url' => $image_urls[0], // The array can't be empty.
       'additional_image_urls' => array_filter($image_urls),
@@ -523,7 +553,7 @@ class WC_Facebook_Product {
         'out of stock',
       'visibility' => !$this->is_hidden()
         ? 'published'
-        : 'staging'
+				: 'staging',
     );
 
     // Only use checkout URLs if they exist.
@@ -563,9 +593,10 @@ class WC_Facebook_Product {
      * @param array $product_data An array of product data
      */
     return apply_filters(
-        "facebook_for_woocommerce_integration_prepare_product",
+				'facebook_for_woocommerce_integration_prepare_product',
         $product_data,
-        $id);
+				$id
+			);
   }
 
 
@@ -574,7 +605,8 @@ class WC_Facebook_Product {
    **/
   public function prepare_variants_for_item(&$product_data) {
     if (!WC_Facebookcommerce_Utils::is_variation_type(
-      $this->get_type())) {
+				$this->get_type()
+			) ) {
       return;
     }
 
@@ -598,14 +630,16 @@ class WC_Facebook_Product {
       $new_name = str_replace(
         'custom_data:',
         '',
-        WC_Facebookcommerce_Utils::sanitize_variant_name($orig_name));
+					WC_Facebookcommerce_Utils::sanitize_variant_name( $orig_name )
+				);
 
       // Sometimes WC returns an array, sometimes it's an assoc array, depending
       // on what type of taxonomy it's using.  array_values will guarantee we
       // only get a flat array of values.
       $options = $this->get_variant_option_name(
         $label,
-        $attributes[$orig_name]);
+					$attributes[ $orig_name ]
+				);
       if (isset($options)) {
         if (is_array($options)) {
           $option_values = array_values($options);
@@ -630,22 +664,28 @@ class WC_Facebook_Product {
           case WC_Facebookcommerce_Utils::FB_VARIANT_SIZE:
           case WC_Facebookcommerce_Utils::FB_VARIANT_COLOR:
           case WC_Facebookcommerce_Utils::FB_VARIANT_PATTERN:
-            array_push($variant_array, array(
+							array_push(
+								$variant_array,
+								array(
               'product_field' => $new_name,
               'label' => $label,
               'options' => $option_values,
-            ));
+								)
+							);
             $product_data[$new_name] = $option_values[0];
             break;
           case WC_Facebookcommerce_Utils::FB_VARIANT_GENDER:
             // If we can't validate the GENDER field, we'll fall through to the
             // default case and set the gender into custom data.
             if ($product_data[$new_name]) {
-              array_push($variant_array, array(
+								array_push(
+									$variant_array,
+									array(
                 'product_field' => $new_name,
                 'label' => $label,
                 'options' => $option_values,
-              ));
+									)
+								);
               break;
             }
 
@@ -660,7 +700,8 @@ class WC_Facebook_Product {
         }
       } else {
         WC_Facebookcommerce_Utils::log(
-          $this->get_id() . ": No options for " . $orig_name);
+						$this->get_id() . ': No options for ' . $orig_name
+					);
         continue;
       }
     }
@@ -672,9 +713,11 @@ class WC_Facebook_Product {
    **/
   public function prepare_variants_for_group($feed_data = false) {
     if (!WC_Facebookcommerce_Utils::is_variable_type(
-      $this->get_type())) {
+				$this->get_type()
+			) ) {
       WC_Facebookcommerce_Utils::fblog(
-        "prepare_variants_for_group called on non-variable product");
+					'prepare_variants_for_group called on non-variable product'
+				);
       return;
     }
 
@@ -697,7 +740,8 @@ class WC_Facebook_Product {
 
       if (!$key) {
         WC_Facebookcommerce_Utils::fblog(
-          "Critical error: can't get attribute name or label!");
+						"Critical error: can't get attribute name or label!"
+					);
         return;
       }
 
@@ -706,7 +750,8 @@ class WC_Facebook_Product {
         $option_values = $variation_attributes[$key];
       } else {
         WC_Facebookcommerce_Utils::log(
-          $this->get_id() . ": No options for " . $name);
+						$this->get_id() . ': No options for ' . $name
+					);
         continue; // Skip variations without valid attribute options
       }
 
@@ -725,7 +770,8 @@ class WC_Facebook_Product {
       ) {
         $option_values = $this->get_grouped_product_option_names(
           $key,
-          $option_values);
+						$option_values
+					);
       }
 
 // https://developers.facebook.com/docs/marketing-api/reference/product-variant/
@@ -737,11 +783,14 @@ class WC_Facebook_Product {
       if ($feed_data) {
         $name = str_replace('custom_data:', '', $name);
       }
-      array_push($final_variants, array(
+				array_push(
+					$final_variants,
+					array(
         'product_field' => $name,
         'label' => $label,
         'options' => $option_values,
-      ));
+					)
+				);
     }
 
     return $final_variants;
